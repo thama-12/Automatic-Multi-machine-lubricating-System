@@ -1,66 +1,63 @@
-const int NUM_MACHINES = 4;
+# Automatic Multi-Machine Lubrication System
 
-// Sensor input pins (Analog)
-const int tempSensorPins[NUM_MACHINES] = {A0, A1, A2, A3};
+## Project Overview
 
-// Solenoid valve control pins (Digital)
-const int valvePins[NUM_MACHINES] = {4, 5, 6, 7};
+This project is a temperature-based automatic lubrication system designed for industrial machines such as lathe, milling, grinding, and shaper. The system uses LM35 temperature sensors to monitor the thermal condition of each machine. When a machine exceeds a specified temperature threshold, its corresponding solenoid valve is activated to lubricate the system for a fixed duration, thereby reducing manual intervention and ensuring consistent performance.
 
-// Settings
-const float TEMP_THRESHOLD = 45.0;                 // Activation temp in °C
-const unsigned long LUBRICATION_DURATION = 5000;   // Duration in ms (5 sec)
+## Author
 
-// State tracking
-bool valveActive[NUM_MACHINES];
-unsigned long lastActivationTime[NUM_MACHINES];
+**Thamarai Kannan M K S**  
+B.E. Mechatronics Engineering  
+Created: June 2025
 
-void setup() {
-  Serial.begin(9600);
+## Key Features
 
-  for (int i = 0; i < NUM_MACHINES; i++) {
-    pinMode(valvePins[i], OUTPUT);
-    digitalWrite(valvePins[i], LOW);
-    valveActive[i] = false;
-    lastActivationTime[i] = 0;
-  }
+- Real-time temperature monitoring using LM35 sensors
+- Independent control of lubrication per machine
+- Solenoid valves controlled via relay/MOSFET drivers
+- Non-blocking timing control using `millis()`
+- Modular and scalable design for additional machines
 
-  Serial.println("Lubrication system initialized...");
-}
+## System Components
 
-void loop() {
-  unsigned long currentTime = millis();
+- Arduino Uno
+- 4 × LM35 Temperature Sensors (Analog)
+- 4 × Solenoid Valves (controlled via relay or MOSFET)
+- Pneumatic/Hydraulic Actuators (external)
+- Hollow Shaft Lubrication Line
+- External Power Supply (12V/24V for valves)
 
-  for (int i = 0; i < NUM_MACHINES; i++) {
-    float temperature = readTemperature(tempSensorPins[i]);
+## Pin Configuration
 
-    Serial.print("Machine ");
-    Serial.print(i + 1);
-    Serial.print(" Temperature: ");
-    Serial.print(temperature);
-    Serial.println(" °C");
+| Machine   | Temperature Sensor Pin | Solenoid Valve Pin |
+|-----------|------------------------|---------------------|
+| Lathe     | A0                     | D4                  |
+| Milling   | A1                     | D5                  |
+| Grinding  | A2                     | D6                  |
+| Shaper    | A3                     | D7                  |
 
-    if (temperature >= TEMP_THRESHOLD && !valveActive[i]) {
-      digitalWrite(valvePins[i], HIGH);
-      valveActive[i] = true;
-      lastActivationTime[i] = currentTime;
-      Serial.print("→ Lubrication started for Machine ");
-      Serial.println(i + 1);
-    }
+## How It Works
 
-    if (valveActive[i] && (currentTime - lastActivationTime[i] >= LUBRICATION_DURATION)) {
-      digitalWrite(valvePins[i], LOW);
-      valveActive[i] = false;
-      Serial.print("✓ Lubrication stopped for Machine ");
-      Serial.println(i + 1);
-    }
-  }
+1. The system continuously reads temperature data from LM35 sensors.
+2. If a machine exceeds the temperature threshold (45°C), the solenoid valve for that machine is activated.
+3. The valve remains ON for a fixed period (5 seconds), after which it automatically shuts off.
+4. This logic repeats independently for each machine.
 
-  delay(500);  // Short delay for stability
-}
+## Files in Repository
 
-float readTemperature(int pin) {
-  int raw = analogRead(pin);
-  float voltage = raw * (5.0 / 1023.0);
-  float tempC = (voltage - 0.5) * 100.0;  // LM35 formula
-  return tempC;
-}
+- `multi_machine_lubrication.ino` – Main Arduino sketch
+- `README.md` – Project documentation
+- `2d of project.jpg` – Project design diagram
+- `Final product.jpg` – Actual prototype image
+- `Applications.jpg` – Use-case documentation
+- `Cost estimation.jpg` – Bill of materials (BOM)
+
+## Applications
+
+- Smart lubrication in CNC and manual machines
+- Industrial automation of legacy equipment
+- Condition-based maintenance in manufacturing environments
+
+## License
+
+This project is intended for academic and learning purposes. For commercial usage or extensions, proper attribution is recommended.
